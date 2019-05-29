@@ -22,8 +22,12 @@ This project is implemented in Python 3.6
 ## Use
 
 The main script is sdtask2.py.
+
+For a correct execution of the system, a file cloud_config file with the RabbitMQ URL and some 
+different setting must be set up. Follow the model at cloud_config_model.
+
 For executing the program it is only necessary to call sdtask2.py as a python script. It receives the
 first argument as the number of nodes it has to create. The number of nodes must be wrapped
 between 1 and 18, if not it will be set to the default 5.
 
-Example: python3 sdtask2.py 7
+Example: >> python3 sdtask2.py 7
