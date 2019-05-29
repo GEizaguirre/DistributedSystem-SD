@@ -17,8 +17,13 @@ using a fanout Exchange. A coordinator ("master") guarantees mutual exclusion am
 processes and ensures all functions receive values in the same order. Finally, every
 serverless function returns the same list of values.
 
+This project is implemented in Python 3.6
+
 ## Use
 
-For executing the program it is only necessary to call it as a python script. It receives the
+The main script is sdtask2.py.
+For executing the program it is only necessary to call sdtask2.py as a python script. It receives the
 first argument as the number of nodes it has to create. The number of nodes must be wrapped
 between 1 and 18, if not it will be set to the default 5.
+
+Example: python3 sdtask2.py 7
