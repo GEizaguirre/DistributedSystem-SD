@@ -1,0 +1,8 @@
+rabbit_mq:
+    url    : <rabbit_mq_url>
+
+exchange_name    : <name_of_exchange>
+leader_queue    : <name_of_leader_queue>
+default_prefix    : <prefix_for_queues>
+min_number    : <minimum_generable_number>
+max_number    : <maximum_generable_number>
