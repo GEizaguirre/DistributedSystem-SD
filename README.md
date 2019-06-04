@@ -31,3 +31,6 @@ first argument as the number of nodes it has to create. The number of nodes must
 between 1 and 18, if not it will be set to the default 5.
 
 Example: >> python3 sdtask2.py 7
+
+## General diagram
+![Alt text](distributedsystemSD.png?raw=true "General diagram of our distributed system")
