@@ -44,6 +44,7 @@ def publishPermission ():
                                            body=json.dumps(msg))
     my_dict['sent_list'].append(sent_number)
     my_dict['requests'].remove(sent_number)
+    print ("Write access to " + str(msg['value']) + " allowed.")
 
 def master (elem):
     
@@ -54,7 +55,7 @@ def master (elem):
     connection = pika.BlockingConnection(params)
     channel = connection.channel()
     
-    result = channel.queue_declare(queue=res['leader_queue'])
+    result = channel.queue_declare(queue=res['leader_queue'], exclusive=True)
 
     my_dict['channel']= channel
     my_dict['config']=res
@@ -63,7 +64,7 @@ def master (elem):
     channel.basic_consume( queue=result.method.queue, consumer_callback=manageRequests, no_ack=True );
     channel.start_consuming()
     
-    result = channel.queue_declare(queue=res['default_prefix']+"master")
+    result = channel.queue_declare(queue=res['default_prefix']+"master", exclusive=True)
     channel.exchange_declare(exchange = res['exchange_name'],
                          exchange_type='fanout')
     channel.queue_bind( exchange=res['exchange_name'],
@@ -86,7 +87,8 @@ def manageRequests (ch, method, properties, body):
     Check for request messages.
     '''
     msg = json.loads(body)
-    addRequest(ident=str(msg['ident']));
+    addRequest(ident=str(msg['ident']))
+    print ("Slave " + str(msg['ident']) + " to permission list.")
     if endRequests(): ch.stop_consuming()
     ''' ch.stop_consuming() '''
     

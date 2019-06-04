@@ -23,6 +23,7 @@ my_dict['sent']=False
 def increaseReceived ( msg):
     my_dict['my_list'].append(msg['value'])
     my_dict['done_list'].append(msg['ident'])
+    print("Slave "+str(my_dict['my_ident'])+" received number "+ str(msg['value']) + " from " + str(msg['ident']))
     my_dict['received_maps']+=1
         
 def end ():
@@ -37,6 +38,7 @@ def publishValue ():
                                            routing_key='',
                                            body=json.dumps(msg))
     my_dict['sent']=True
+    print("Slave " + str(my_dict['my_ident']) +" published the value " + str(my_dict['my_number']))
 
 
 def slave (num_nodes, ident, res):
@@ -49,7 +51,7 @@ def slave (num_nodes, ident, res):
     msg = dict()
     msg['ident']=ident
     channel.basic_publish (exchange='', routing_key=res['leader_queue'], body=json.dumps(msg))
-    result = channel.queue_declare(queue=res['default_prefix']+str(ident))
+    result = channel.queue_declare(queue=res['default_prefix']+str(ident), exclusive=True)
     channel.exchange_declare(exchange = res['exchange_name'],
                          exchange_type='fanout')
     channel.queue_bind(exchange=res['exchange_name'],
@@ -62,6 +64,7 @@ def slave (num_nodes, ident, res):
     channel.basic_consume(queue=result.method.queue, consumer_callback=manageResults, no_ack=True)
     channel.start_consuming()
     connection.close()
+    print("Slave " + str(my_dict['my_ident']) +' finished.')
     return (my_dict['my_list'])
 
 
