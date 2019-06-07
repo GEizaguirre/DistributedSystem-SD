@@ -16,6 +16,7 @@ import sys
 import pika
 from fn_pywren_slave import  slave
 from fn_pywren_master import  master
+import time
 
 '''
 Read of the configuration file.
@@ -24,7 +25,7 @@ try:
     with open('cloud_config', 'r') as config_file:
         res = yaml.safe_load(config_file)
 except FileNotFoundError:
-    print (" We could not find your configuration yaml file cloud_config.")
+    print (" We could not find your configuration yaml file (cloud_config).")
     sys.exit(1)
 
 default_node_number = 5
@@ -57,15 +58,19 @@ def main ():
                 res['mode'] = "-sources"
             else : 
                 if sys.argv[2] == "-verbose" : res['mode'] = "-verbose"
-                else:
-                    print ("Unknown mode.")
-                    res['mode'] = "-raw"
+                else :
+                    if sys.argv[2] == "-time" : res['mode'] = "-time"
+                    else:
+                        print ("Unknown mode.")
+                        res['mode'] = "-raw"
     else:
         res['mode'] = "-raw"
 
     print ("Execution mode set to "+ res['mode'] + ".")
     pw1 = pywren.ibm_cf_executor(rabbitmq_monitor=True)
 
+
+    if res['mode'] == "-time" : start_time = time.time()
     ''' 
     Call leader
     '''
@@ -94,6 +99,8 @@ def main ():
         print ("The algorithm worked.")
     else:
         print ("The algorithm failed.")
+    if res['mode'] == "-time" : 
+        print ("Execution time: %.4f." % (time.time() - start_time) )
         
 def show_help ():
     f = open('Description', 'r')
