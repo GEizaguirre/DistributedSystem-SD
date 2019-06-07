@@ -33,4 +33,8 @@ between 1 and 18, if not it will be set to the default 5.
 Example: >> python3 sdtask2.py 7
 
 ## General diagram
-![Alt text](distributedsystemSD.png?raw=true "General diagram of our distributed system")
+![Alt text](diagrams/distributedsystemSD1.jpeg?raw=true "General diagram of our distributed system 1")
+![Alt text](diagrams/distributedsystemSD2.jpeg?raw=true "General diagram of our distributed system 2")
+![Alt text](diagrams/distributedsystemSD3.jpeg?raw=true "General diagram of our distributed system 3")
+
+
