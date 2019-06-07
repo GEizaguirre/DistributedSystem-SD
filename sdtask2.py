@@ -48,9 +48,22 @@ def main ():
         else:
             node_number=default_node_number
             print ("Number of nodes set to the default: " + str(default_node_number))
-            
-    
-    ''' pw1 = pywren.ibm_cf_executor(runtime_memory=128, rabbitmq_monitor=True) '''
+        
+    ''' mode argument '''
+    if ( len(sys.argv) > 2 ):
+        if sys.argv[2] == "-raw": res['mode'] = "-raw"
+        else :
+            if sys.argv[2] == "-sources": 
+                res['mode'] = "-sources"
+            else : 
+                if sys.argv[2] == "-verbose" : res['mode'] = "-verbose"
+                else:
+                    print ("Unknown mode.")
+                    res['mode'] = "-raw"
+    else:
+        res['mode'] = "-raw"
+
+    print ("Execution mode set to "+ res['mode'] + ".")
     pw1 = pywren.ibm_cf_executor(rabbitmq_monitor=True)
 
     ''' 
@@ -72,7 +85,7 @@ def main ():
         params[count] ['ident'] = count + 1
         params[count] ['res'] = res
     print("Calling...")
-    ''' pw2 = pywren.ibm_cf_executor(runtime_memory=128, rabbitmq_monitor=True) '''
+
     pw2 = pywren.ibm_cf_executor(rabbitmq_monitor=True)
     pw2.map(slave, params)
     result2 = pw2.get_result()

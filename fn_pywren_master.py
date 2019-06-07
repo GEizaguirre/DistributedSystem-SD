@@ -18,6 +18,7 @@ my_dict = dict()
 my_dict['requests']= list()
 my_dict['sent_list']=list()
 my_dict['value_published']=True
+my_dict['mode']="-raw"
         
 def endRequests ():
     return len(my_dict['requests']) == my_dict['current_maps']
@@ -39,7 +40,7 @@ def publishPermission ():
     my_dict['requests'].clear()
     my_dict['current_maps'] = my_dict['current_maps'] - 1
     my_dict['value_published'] = False
-    print ("Write access to " + str(msg['value']) + " allowed.")
+    if my_dict['mode'] == "-verbose" : print ("Write access to " + str(msg['value']) + " allowed.")
 
 def master (elem):
     
@@ -47,13 +48,15 @@ def master (elem):
     my_dict['number_maps'] = elem ['num_nodes']
     my_dict['current_maps'] = my_dict['number_maps']
     my_dict['config'] = elem['res']
+    my_dict["mode"] = my_dict['config']['mode']
+    
     params = pika.URLParameters(my_dict['config']['rabbit_mq']['url'])
     params.socket_timeout = 10
     connection = pika.BlockingConnection(params)
     channel = connection.channel()
     my_dict['channel'] = channel
     my_dict['ident'] = my_dict['number_maps'] + 1
-    result = channel.queue_declare(queue=my_dict['config']['leader_queue'],  exclusive=True)
+    result = channel.queue_declare(queue=my_dict['config']['leader_queue'], exclusive=True)
     channel.exchange_declare(exchange = my_dict['config']['exchange_name'],
                          exchange_type='fanout')
     channel.queue_bind( exchange=my_dict['config']['exchange_name'],

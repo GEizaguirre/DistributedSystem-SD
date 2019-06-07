@@ -18,26 +18,35 @@ my_dict = dict()
 my_dict['received_maps']=0
 my_dict['my_list']= list()
 my_dict['sent']=False
+my_dict['mode']="-raw"
         
 def increaseReceived ( msg):
-    my_dict['my_list'].append([msg['value'], msg['ident']])
-    ''' print("Slave "+str(my_dict['my_ident'])+" received number "+ str(msg['value']) + " from " + str(msg['ident'])) '''
+    
+    if my_dict['mode'] == "-sources" : my_dict['my_list'].append([msg['value'], msg['ident']])
+    else: my_dict['my_list'].append(msg['value'])
+    if my_dict['mode'] == "-verbose" : print(
+        "Slave "+str(my_dict['my_ident']) 
+        +" received number "+ str(msg['value']) 
+        + " from " + str(my_dict['my_ident'])) 
     my_dict['received_maps']+=1
         
 def end ():
+    
     return my_dict['received_maps'] == my_dict['number_maps']
     
 def publishValue ():
+    
     msg = dict()
     msg['type']="VALUE"
     msg['value']=my_dict['my_number']
-    msg['ident']=my_dict['my_ident']
+    if my_dict['mode'] == "-sources" : msg['ident'] = my_dict['my_ident']
     my_dict['channel'].basic_publish( exchange=my_dict['config']['exchange_name'],
                                            routing_key='',
                                            body=json.dumps(msg))
     my_dict['sent']=True
-    ''' print("Slave " + str(my_dict['my_ident']) +" published the value " + str(my_dict['my_number'])) '''
-
+    if my_dict['mode'] == "-verbose" : print( 
+            "Slave " + str(my_dict['my_ident']) +
+            " published the value " + str(my_dict['my_number']))
 
 def slave (num_nodes, ident, res):
     
@@ -46,31 +55,32 @@ def slave (num_nodes, ident, res):
     connection = pika.BlockingConnection(params)
     channel = connection.channel()
     
-    msg = dict()
-    msg['ident']=ident
+    my_dict['number_maps'] = num_nodes
+    my_dict['config'] = res
+    my_dict['my_number'] = random.randint(my_dict['config']['min_number'],my_dict['config']['max_number'])
+    my_dict['my_ident'] = ident
+    my_dict["mode"] = res['mode']
     
-    my_dict['number_maps']=num_nodes
-    my_dict['config']=res
-    my_dict['my_number']=random.randint(my_dict['config']['min_number'],my_dict['config']['max_number'])
-    my_dict['my_ident']=ident
     result = channel.queue_declare(queue=my_dict['config']['default_prefix']+str(ident), exclusive=True)
     channel.exchange_declare(exchange = my_dict['config']['exchange_name'],
                          exchange_type='fanout')
     channel.queue_bind(exchange=my_dict['config']['exchange_name'],
                    queue=result.method.queue)
     my_dict['channel']= channel
+    
     msg = dict()
     msg['type']="WRITE_REQUEST"
     msg['ident']=my_dict['my_ident']
+    
     channel.basic_publish (exchange='', routing_key=my_dict['config']['leader_queue'], body=json.dumps(msg))
-    ''' print("Slave " + str(my_dict['my_ident']) + " published its write request") '''
     channel.basic_consume(queue=result.method.queue, consumer_callback=manageResults, no_ack=True)
     channel.start_consuming()
     connection.close()
-    ''' print("Slave " + str(my_dict['my_ident']) +' finished.') '''
+    
+    if my_dict['mode'] == "-verbose": print(
+        "Slave " + str(my_dict['my_ident']) +' finished.')
+    
     return (my_dict['my_list'])
-
-
 
 def manageResults (ch, method, properties, body):
     '''
