@@ -50,7 +50,8 @@ def main ():
             print ("Number of nodes set to the default: " + str(default_node_number))
             
     
-    pw1 = pywren.ibm_cf_executor(runtime_memory=128, rabbitmq_monitor=True)
+    ''' pw1 = pywren.ibm_cf_executor(runtime_memory=128, rabbitmq_monitor=True) '''
+    pw1 = pywren.ibm_cf_executor(rabbitmq_monitor=True)
 
     ''' 
     Call leader
@@ -71,28 +72,24 @@ def main ():
         params[count] ['ident'] = count + 1
         params[count] ['res'] = res
     print("Calling...")
-    pw2 = pywren.ibm_cf_executor(runtime_memory=128, rabbitmq_monitor=True)
+    ''' pw2 = pywren.ibm_cf_executor(runtime_memory=128, rabbitmq_monitor=True) '''
+    pw2 = pywren.ibm_cf_executor(rabbitmq_monitor=True)
     pw2.map(slave, params)
     result2 = pw2.get_result()
     print (result2)
-    if result2.count(result2[0]) == len(result2):
+    if checkEqual(result2):
         print ("The algorithm worked.")
     else:
         print ("The algorithm failed.")
         
-   
-def config_channel(res):
-    params = pika.URLParameters(res['rabbit_mq']['url'])
-    connection = pika.BlockingConnection(params)
-    channel = connection.channel()
-    return channel
-
 def show_help ():
     f = open('Description', 'r')
     txt= f.read()
     print (txt)
     f.close()
     
+def checkEqual (lst):
+   return lst[1:] == lst[:-1]
 if __name__ == '__main__':
     main()
 

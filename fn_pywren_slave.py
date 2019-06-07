@@ -17,13 +17,11 @@ import random
 my_dict = dict()
 my_dict['received_maps']=0
 my_dict['my_list']= list()
-my_dict['done_list']=list()
 my_dict['sent']=False
         
 def increaseReceived ( msg):
-    my_dict['my_list'].append(msg['value'])
-    my_dict['done_list'].append(msg['ident'])
-    print("Slave "+str(my_dict['my_ident'])+" received number "+ str(msg['value']) + " from " + str(msg['ident']))
+    my_dict['my_list'].append([msg['value'], msg['ident']])
+    ''' print("Slave "+str(my_dict['my_ident'])+" received number "+ str(msg['value']) + " from " + str(msg['ident'])) '''
     my_dict['received_maps']+=1
         
 def end ():
@@ -38,7 +36,7 @@ def publishValue ():
                                            routing_key='',
                                            body=json.dumps(msg))
     my_dict['sent']=True
-    print("Slave " + str(my_dict['my_ident']) +" published the value " + str(my_dict['my_number']))
+    ''' print("Slave " + str(my_dict['my_ident']) +" published the value " + str(my_dict['my_number'])) '''
 
 
 def slave (num_nodes, ident, res):
@@ -50,21 +48,26 @@ def slave (num_nodes, ident, res):
     
     msg = dict()
     msg['ident']=ident
-    channel.basic_publish (exchange='', routing_key=res['leader_queue'], body=json.dumps(msg))
-    result = channel.queue_declare(queue=res['default_prefix']+str(ident), exclusive=True)
-    channel.exchange_declare(exchange = res['exchange_name'],
-                         exchange_type='fanout')
-    channel.queue_bind(exchange=res['exchange_name'],
-                   queue=result.method.queue)
+    
     my_dict['number_maps']=num_nodes
     my_dict['config']=res
     my_dict['my_number']=random.randint(my_dict['config']['min_number'],my_dict['config']['max_number'])
     my_dict['my_ident']=ident
+    result = channel.queue_declare(queue=my_dict['config']['default_prefix']+str(ident), exclusive=True)
+    channel.exchange_declare(exchange = my_dict['config']['exchange_name'],
+                         exchange_type='fanout')
+    channel.queue_bind(exchange=my_dict['config']['exchange_name'],
+                   queue=result.method.queue)
     my_dict['channel']= channel
+    msg = dict()
+    msg['type']="WRITE_REQUEST"
+    msg['ident']=my_dict['my_ident']
+    channel.basic_publish (exchange='', routing_key=my_dict['config']['leader_queue'], body=json.dumps(msg))
+    ''' print("Slave " + str(my_dict['my_ident']) + " published its write request") '''
     channel.basic_consume(queue=result.method.queue, consumer_callback=manageResults, no_ack=True)
     channel.start_consuming()
     connection.close()
-    print("Slave " + str(my_dict['my_ident']) +' finished.')
+    ''' print("Slave " + str(my_dict['my_ident']) +' finished.') '''
     return (my_dict['my_list'])
 
 
@@ -77,10 +80,16 @@ def manageResults (ch, method, properties, body):
     if msg['type'] == "VALUE":
         increaseReceived(msg)
         if end(): 
-            ch.stop_consuming() 
+            ch.stop_consuming()
+        else:
+            if ( my_dict['sent'] == False ):
+                msg = dict()
+                msg['ident']=my_dict['my_ident']
+                msg['type']="WRITE_REQUEST"
+                ch.basic_publish (exchange='', routing_key=my_dict['config']['leader_queue'], body=json.dumps(msg))
     else:
         if msg['type'] == "WRITE_PERMISSION":
-            if  ( not my_dict['sent']  ) and (int(msg['value']) == my_dict['my_ident']) :
+            if  ( not my_dict['sent']  ) and ( int(msg['value']) == my_dict['my_ident'] ) :
                 publishValue()
         
 
