@@ -4,7 +4,7 @@
 
 Author: German Telmo Eizaguirre Suarez (URV, Tarragona)
 Version: 1.0
-Date: 29-05-2019
+Date: 12-06-2019
 
 Distributed System based on Serverless Computing in the IBM Cloud.
 This program uses the IBM Cloud Functions service through the IBM-PyWren middleware 
@@ -28,9 +28,23 @@ different setting must be set up. Follow the model at cloud_config_model.
 
 For executing the program it is only necessary to call sdtask2.py as a python script. It receives the
 first argument as the number of nodes it has to create. The number of nodes must be wrapped
-between 1 and 18, if not it will be set to the default 5.
+between 1 and 17, if not it will be set to the default 5.
 
 Example: >> python3 sdtask2.py 7
+
+Different execution modes are allowed. They must be specified after the number of nodes. 
+Posible modes are the following.
+
+-raw: results are simply collected, there are no extra logs.
+-sources: results are collected and the source node is showed along with each value from
+the list.
+-time: the total execution time of the program is showed at the end.
+-verbose: prints are done from the remote functions so that their workflow can be
+analysed from a remote log visualizer.
+
+Example: >> python3 sdtask2.py 9 -sources
+Example: >> python3 sdtask2.py 14 -time
+Example: >> python3 sdtask2.py 12 -verbose
 
 ## General diagram
 ![Alt text](diagrams/distributedsystemSD1.jpeg?raw=true "General diagram of our distributed system 1")
