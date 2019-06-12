@@ -43,7 +43,9 @@ the list.
 analysed from a remote log visualizer.
 
 Example: >> python3 sdtask2.py 9 -sources
+
 Example: >> python3 sdtask2.py 14 -time
+
 Example: >> python3 sdtask2.py 12 -verbose
 
 ## General diagram
