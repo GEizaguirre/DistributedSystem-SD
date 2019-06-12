@@ -36,9 +36,12 @@ Different execution modes are allowed. They must be specified after the number o
 Posible modes are the following.
 
 "-raw" results are simply collected, there are no extra logs.
+
 "-sources" results are collected and the source node is showed along with each value from
 the list.
+
 "-time" the total execution time of the program is showed at the end.
+
 "-verbose" prints are done from the remote functions so that their workflow can be
 analysed from a remote log visualizer.
 
