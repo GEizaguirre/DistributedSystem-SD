@@ -1,5 +1,6 @@
 '''
-Created on 29 may 2019
+Version 1.0
+12 June 2019
 
 master function for a list creator Serverless
 distributed system.

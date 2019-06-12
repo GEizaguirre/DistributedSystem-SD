@@ -1,5 +1,6 @@
 '''
-Created on 29 may 2019
+Version 1.0
+12 June 2019
 
 Serverless Distributed System, main program.
 Creates n equal lists of random numbers remotely.
